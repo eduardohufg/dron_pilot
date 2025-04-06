@@ -28,6 +28,7 @@ setup(
             'cmd_dron = dron_pilot.cmd_dron:main',
             'node_controller = dron_pilot.node_controller:main',
             'dron_teleop = dron_pilot.dron_teleop:main',
+            'tcp2ros = dron_pilot.main:main',
         ],
     },
 )
