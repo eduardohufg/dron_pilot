@@ -9,85 +9,113 @@ import numpy as np
 
 
 class ArucoDetector(Node):
+    """
+    Node that detects ArUco markers in images, computes their offset 
+    relative to the image center, checks orientation, and publishes results.
+    """
+
     def __init__(self):
         super().__init__('aruco_detector')
+
         self.bridge = CvBridge()
 
-        self.subscription = self.create_subscription(Image,'/x500/camera/image_raw', self.image_callback, 10)
+        # Subscribers
+        self.image_subscription = self.create_subscription(Image, '/x500/camera/image_raw', self.image_callback, 10)
 
-        self.center_pub = self.create_publisher(Bool, '/aruco_centered', 10)
+        # Publishers
+        self.aruco_centered_pub = self.create_publisher(Bool, '/aruco_centered', 10)
         self.aruco_detected_pub = self.create_publisher(Bool, '/aruco_detected', 10)
         self.orientation_ok_pub = self.create_publisher(Bool, '/aruco_orientation_ok', 10)
         self.offset_pub = self.create_publisher(Point, '/aruco_offset', 10)
         self.image_pub = self.create_publisher(Image, '/aruco_detector/image_processed', 10)
-        self.offset_orienation = self.create_publisher(Float64, '/aruco_orientation', 10)
+        self.offset_orientation_pub = self.create_publisher(Float64, '/aruco_orientation', 10)
 
         self.aruco_dict = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_4X4_50)
-        self.parameters = cv2.aruco.DetectorParameters()
-        self.detector = cv2.aruco.ArucoDetector(self.aruco_dict, self.parameters)
+        self.detector_parameters = cv2.aruco.DetectorParameters()
+        self.detector = cv2.aruco.ArucoDetector(self.aruco_dict, self.detector_parameters)
 
-        self.center_threshold = 30  # pixeles
+        self.center_threshold = 30
 
-    def image_callback(self, msg):
+        # State variables
+        self.aruco_detected_msg = Bool()
+        self.orientation_ok_msg = Bool()
+        self.offset_orientation = Float64()
+        self.offset_position = Point()
+
+    def image_callback(self, msg: Image) -> None:
+   
         frame = self.bridge.imgmsg_to_cv2(msg, desired_encoding='bgr8')
         processed_frame = frame.copy()
+
         height, width, _ = frame.shape
         image_center = (width // 2, height // 2)
 
         corners, ids, _ = self.detector.detectMarkers(frame)
 
-        if ids is not None:
+        if ids is not None and len(corners) > 0:
 
-            self.aruco_detected_pub.publish(Bool(data=True))
+            self.aruco_detected_msg.data = True
+            self.aruco_detected_pub.publish(self.aruco_detected_msg)
 
-            c = corners[0][0]
-            aruco_center_x = int(np.mean(c[:, 0]))
-            aruco_center_y = int(np.mean(c[:, 1]))
+            first_marker_corners = corners[0][0]
+            aruco_center_x = int(np.mean(first_marker_corners[:, 0]))
+            aruco_center_y = int(np.mean(first_marker_corners[:, 1]))
 
             dx = aruco_center_x - image_center[0]
             dy = aruco_center_y - image_center[1]
 
-            self.get_logger().info(f"Aruco dx: {dx}, dy: {dy}")
+            #self.get_logger().info(f"Aruco dx: {dx}, dy: {dy}")
 
-            top_candidates = sorted(c, key=lambda punto: punto[1])[:2]
-        # 2. Ordenamos esos dos puntos por su coordenada x para identificar la esquina izquierda y la derecha
-            top_left, top_right = sorted(top_candidates, key=lambda punto: punto[0])
+            # Determine the top edge corners of the detected ArUco marker
+            top_candidates = sorted(first_marker_corners, key=lambda point: point[1])[:2]
+            top_left, top_right = sorted(top_candidates, key=lambda point: point[0])
+
             y_top_left = top_left[1]
             y_top_right = top_right[1]
 
-            # Calcular el error de orientación: si el top_left está más abajo que el top_right, error > 0, de lo contrario, error < 0
-            error_orientarion = y_top_left - y_top_right
+            # Calculate orientation error: difference in y-coordinates of top corners
+            orientation_error = y_top_left - y_top_right
 
-            if abs(error_orientarion) < 5:
-                self.orientation_ok_pub.publish(Bool(data=True))
+            if abs(orientation_error) < 5:
+                self.orientation_ok_msg.data = True
+                self.orientation_ok_pub.publish(self.orientation_ok_msg)
             else:
-                self.orientation_ok_pub.publish(Bool(data=False))
+                self.orientation_ok_msg.data = False
+                self.orientation_ok_pub.publish(self.orientation_ok_msg)
+                self.offset_orientation.data = float(orientation_error)
 
-            self.offset_orienation.publish(Float64(data=float(error_orientarion)))
-            # Publicar si está centrado
+            self.offset_orientation_pub.publish(self.offset_orientation)
+
             centered = abs(dx) < self.center_threshold and abs(dy) < self.center_threshold
-            centered_msg = Bool()
-            centered_msg.data = centered
-            self.center_pub.publish(centered_msg)
+            centered_msg = Bool(data=centered)
+            self.aruco_centered_pub.publish(centered_msg)
 
-            # Publicar desplazamiento
-            offset_msg = Point()
-            offset_msg.x = float(dx)
-            offset_msg.y = float(dy)
-            offset_msg.z = 0.0
-            self.offset_pub.publish(offset_msg)
+            self.offset_position.x = float(dx)
+            self.offset_position.y = float(dy)
+            self.offset_position.z = 0.0
+            self.offset_pub.publish(self.offset_position)
 
-            # Dibujar ArUco y centro
             cv2.aruco.drawDetectedMarkers(processed_frame, corners, ids)
             cv2.circle(processed_frame, (aruco_center_x, aruco_center_y), 6, (0, 255, 0), -1)
-            cv2.drawMarker(processed_frame, image_center, (0, 0, 255), markerType=cv2.MARKER_CROSS, markerSize=15, thickness=2)
-
+            cv2.drawMarker(
+                processed_frame,
+                image_center,
+                (0, 0, 255),
+                markerType=cv2.MARKER_CROSS,
+                markerSize=15,
+                thickness=2
+            )
         else:
-            self.aruco_detected_pub.publish(Bool(data=False))
-            self.center_pub.publish(Bool(data=False))
-            self.offset_pub.publish(Point(x=0.0, y=0.0, z=0.0))
 
-        # Publicar imagen procesada
+            self.aruco_detected_msg.data = False
+            self.aruco_detected_pub.publish(self.aruco_detected_msg)
+
+            self.aruco_centered_pub.publish(Bool(data=False))
+            self.offset_position.x = 0.0
+            self.offset_position.y = 0.0
+            self.offset_position.z = 0.0
+            self.offset_pub.publish(self.offset_position)
+
         out_msg = self.bridge.cv2_to_imgmsg(processed_frame, encoding='bgr8')
         self.image_pub.publish(out_msg)
 

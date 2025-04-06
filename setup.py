@@ -23,10 +23,11 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'detect_aruco = detect_aruco.detect_aruco:main',
-            'depth_camera = detect_aruco.depth_camera:main',
-            'cmd_dron = detect_aruco.cmd_dron:main',
-            'node_controller = detect_aruco.node_controller:main',
+            'detect_aruco = dron_pilot.detect_aruco:main',
+            'depth_camera = dron_pilot.depth_camera:main',
+            'cmd_dron = dron_pilot.cmd_dron:main',
+            'node_controller = dron_pilot.node_controller:main',
+            'dron_teleop = dron_pilot.dron_teleop:main',
         ],
     },
 )

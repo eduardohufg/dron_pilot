@@ -3,22 +3,22 @@ from launch_ros.actions import Node
 
 def generate_launch_description():
 
-    node1 = Node(package='detect_aruco',
+    node1 = Node(package='dron_pilot',
                        executable='detect_aruco',
                        name="detect_aruco",
                        )
         
-    node2 = Node(package='detect_aruco',
+    node2 = Node(package='dron_pilot',
                        executable='depth_camera',
                        name="depth_camera",
                        )
     
-    node3 = Node(package='detect_aruco',
+    node3 = Node(package='dron_pilot',
                        executable='cmd_dron',
                        name="cmd_dron",
                        )
     
-    node4 = Node(package='detect_aruco',
+    node4 = Node(package='dron_pilot',
                        executable='node_controller',
                        name="node_controller",
                        )
@@ -43,10 +43,6 @@ def generate_launch_description():
         ],
         output='screen'
     )
-    
-    
-    
-    
     
     l_d = LaunchDescription([node3, node2, node1, node4, bridge_node, bridge_camera_raw])
 
