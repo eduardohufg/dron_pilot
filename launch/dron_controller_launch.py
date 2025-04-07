@@ -22,6 +22,11 @@ def generate_launch_description():
                        executable='node_controller',
                        name="node_controller",
                        )
+
+    node5 = Node(package='dron_pilot',
+                       executable='tcp2ros',
+                       name="tcp2ros",
+                       )
     
     bridge_node = Node(
         package='ros_gz_bridge',
@@ -44,6 +49,6 @@ def generate_launch_description():
         output='screen'
     )
     
-    l_d = LaunchDescription([node3, node2, node1, node4, bridge_node, bridge_camera_raw])
+    l_d = LaunchDescription([node3, node2, node1, node4, bridge_node, bridge_camera_raw, node5])
 
     return l_d
