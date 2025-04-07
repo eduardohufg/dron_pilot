@@ -27,7 +27,7 @@ def register_ros2_callback():
         raise RuntimeError("ROS2 node not initialized")
 
 
-@joy_router.websocket("/joy")
+@joy_router.websocket("/move")
 async def websocket_endpoint(websocket: WebSocket):
     await websocket.accept()
     active_connections.add(websocket)

@@ -1,12 +1,14 @@
 import rclpy
 from rclpy.node import Node
 from std_msgs.msg import String
-from sensor_msgs.msg import Joy, Image
+from sensor_msgs.msg import Image
+from geometry_msgs.msg import Pose
+from std_msgs.msg import Bool
 from rclpy.executors import SingleThreadedExecutor
 from threading import Thread
 from typing import List, Callable
 import json  # Para parsear los datos del WebSocket
-
+import math
 import numpy as np
 import cv2
 import base64
@@ -14,42 +16,71 @@ import base64
 class ROS2Bridge(Node):
     def __init__(self):
         super().__init__('fastapi_ros2_bridge')
-        self.publisher = self.create_publisher(Joy, 'joy', 10)
-        self.subscription = self.create_subscription(
-            String,
-            'response_topic',
-            self.listener_callback,
-            10
-        )
-
-
-        self.image_subscription = self.create_subscription(
-            Image,
-            '/aruco_detector/image_processed',
-            self.image_callback,
-            10
-        )
+        
+        self.pub_move = self.create_publisher(Pose, '/move/drone', 10)
+        self.pub_init = self.create_publisher(Bool, '/init_controller', 10)
+        self.sub_move = self.create_subscription(Pose, '/move/drone', self.move_callback, 10)
+        self.image_subscription = self.create_subscription(Image, '/aruco_detector/image_processed', self.image_callback, 10)
 
         self._callbacks: List[Callable[[str], None]] = []
 
         self._image_callbacks: List[Callable[[str], None]] = []
 
+        self.yaw = 0.0
+
+        self.inited = Bool()
+
+    def move_callback(self, msg: Pose):
+        self.yaw = msg.orientation.z
+
     def publish_message(self, message: str):
         try:
-            data = json.loads(message)  # Convierte el string JSON a diccionario
-            
-            # Crea el mensaje Joy con valores por defecto
-            msg = Joy()
-            msg.axes = [0.0] * 8  # Inicializa con 8 valores en 0.0 (ajustable según el controlador)
-            msg.buttons = [0] * 12  # Inicializa con 12 botones en 0 (ajustable según el controlador)
+            data = json.loads(message)
 
-            # Asigna los valores del joystick a los índices especificados
-            msg.axes[4] = -float(data["left_joystick"]["y"])  # Asigna a msg.axes[4]
-            msg.axes[1] = -float(data["right_joystick"]["y"])  # Asigna a msg.axes[1]
+            step = 0.03     
+            yaw_step = 0.05 
+            delta_x = 0.0
+            delta_y = 0.0
+            delta_z = 0.0
 
-            # Publica el mensaje en el tópico Joy
-            self.publisher.publish(msg)
-            self.get_logger().info(f'Published Joy message: {msg.axes}')
+            if int(data["position"]["x_pos"]) == 1:
+                delta_x = step * math.cos(self.yaw)
+                delta_y = step * math.sin(self.yaw)
+            elif int(data["position"]["x_neg"]) == 1:
+                delta_x = -step * math.cos(self.yaw)
+                delta_y = -step * math.sin(self.yaw)
+            elif int(data["position"]["y_pos"]) == 1:
+                delta_x = -step * math.sin(self.yaw)
+                delta_y = step * math.cos(self.yaw)
+            elif int(data["position"]["y_neg"]) == 1:
+                delta_x = step * math.sin(self.yaw)
+                delta_y = -step * math.cos(self.yaw)
+            elif int(data["orientation"]["yaw_pos"]) == 1:
+                self.yaw = yaw_step
+            elif int(data["orientation"]["yaw_neg"]) == 1:
+                self.yaw = -yaw_step
+
+            elif int(data["position"]["z_pos"]) == 1:
+                delta_z = -step
+            elif int(data["position"]["z_neg"]) == 1:
+                delta_z = step
+
+            if int(data['command']['init']) == 1:
+                self.inited.data = True
+                self.pub_init.publish(self.inited)
+            else:
+                self.inited.data = False
+                self.pub_init.publish(self.inited)
+
+
+            new_pose = Pose()
+            new_pose.position.x = delta_x
+            new_pose.position.y = delta_y
+            new_pose.position.z = delta_z
+            new_pose.orientation.z = self.yaw 
+
+            self.pub_move.publish(new_pose)
+
 
         except (json.JSONDecodeError, KeyError, ValueError) as e:
             self.get_logger().error(f'Error processing message: {e}')
@@ -61,25 +92,18 @@ class ROS2Bridge(Node):
 
 
     def image_callback(self, msg: Image):
-        """
-        Callback para el tópico '/aruco_detector/image_processed'.
-        Convierte la imagen a base64 y la reenvía a todos los WebSockets interesados.
-        """
+      
         try:
-            # Ejemplo: asumiendo que msg.encoding = 'bgr8' o similar
-            # Convertimos a un numpy array para usar cv2
+          
             height = msg.height
             width = msg.width
-            # canales = 3 en caso de bgr8
             channels = 3
             img_array = np.array(msg.data, dtype=np.uint8).reshape((height, width, channels))
             
-            # Codificar la imagen en JPG
             _, buffer = cv2.imencode(".jpg", img_array)
-            # Convertir a base64
+         
             frame_base64 = base64.b64encode(buffer).decode("utf-8")
             
-            # Invocar callbacks registrados con la imagen
             for cb in self._image_callbacks:
                 cb(frame_base64)
         
