@@ -91,6 +91,7 @@ pip install aioconsole
 pip install pygame
 sudo apt install ros-humble-ros-gzgarden
 pip install numpy
+pip install "numpy<2.0"
 pip install opencv-python
 ```
 
@@ -137,9 +138,109 @@ dentro de la carpeta copia el repositorio del paquete:
 git clone https://github.com/eduardohufg/dron_pilot
 ```
 
+tambien clona el paquete de mandajes de comunicacion del dron
+
+```bash
+git clone https://github.com/PX4/px4_msgs.git
+```
+
 regresa a la carpeta raiz del workspace y compila
 
 ```bash
 cd ..
 colcon build
 ```
+
+## Inicializacion de simulacion
+
+puedes cerrar todas las terminales y empezar desde aqui o dirijete a las rutas mencionadas.
+
+Abre una terminal y e a la carpeta donde descargaste QGroundControl y ejecutalo
+
+```bash
+cd ./Downloads
+ ./QGroundControl.AppImage 
+```
+
+Abre otra terminal y ejecuta el agente de comunicacion
+
+```bash
+cd Micro-XRCE-DDS-Agent/
+MicroXRCEAgent udp4 -p 8888
+```
+
+En otra terminal corre la simulacion
+
+```bash
+cd PX4-Autopilot/
+make px4_sitl gz_x500_depth
+```
+
+deberias ver algo asi:
+
+![gz iamgen](assets/s2.png)
+
+En otro terminal dirijete al workspace de ROS y ve al siguiente directorio
+
+```bash
+cd ws_px4/src/dron_pilot
+```
+
+En esta ruta crea y activa un entorno virtual que nos servira para instalar las dependencias
+
+```bash
+python3 -m venv .venv
+source venv/bin/activate
+```
+
+Una vez activado corre el siguiente comando en esa ruta para descargar las dependencias:
+
+```bash
+pip install -r requirements.txt
+```
+
+Despues regresa a la raiz de worksape y haz un source del entorno:
+
+```bash
+cd ../..
+source install/setup.bash
+```
+
+Corre el paquete:
+
+```bash
+ros2 launch dron_pilot dron_controller_launch.py
+```
+
+Para poder correr la interfaz wed abre una terminal y dirigete a la siguiente ruta:
+
+```bash
+cd ws_px4/src/dron_pilot/app
+```
+
+Instala las dependenciad de node y corre el programa:
+
+```bash
+npm install
+npm run dev
+```
+
+Despues abre un navegador y dirigete a la ruta que de indico: 
+
+```bash
+http://localhost:5173/
+```
+
+Deberiad ver algo como lo siguiente:
+
+![interfaz](assets/s3.png)
+
+Y listo!! con los botones puedes teleoperar al dron y si presionas el boton de INIT empieza con la busqueda y localizacion del auruco:
+
+
+![aruco](assets/s4.png)
+
+
+
+
+
