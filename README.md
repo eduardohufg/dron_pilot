@@ -44,3 +44,25 @@ make
 sudo make install
 sudo ldconfig /usr/local/lib/
 ```
+
+En otra terminal corre los siguinetes comandos para configurar el QGroundControl necesario para la simualcion
+
+```bash
+sudo usermod -a -G dialout $USER
+sudo apt-get remove modemmanager -y
+sudo apt install gstreamer1.0-plugins-bad gstreamer1.0-libav gstreamer1.0-gl -y
+sudo apt install libfuse2 -y
+sudo apt install libxcb-xinerama0 libxkbcommon-x11-0 libxcb-cursor-dev -y
+```
+
+Despues instala la siguiente imagen:
+
+*Download*:
+   [QGroundControl.AppImage](https://d176tv9ibo4jno.cloudfront.net/latest/QGroundControl.AppImage)
+
+Probablemente se descargo en la carpeta Downloads, por lo que dirijete a esa carpera o a la carpeta donde se haya guardado la descarga y dale permisos de ejecucion
+
+```bash
+cd ./Downloads
+chmod +x ./QGroundControl.AppImage
+```
