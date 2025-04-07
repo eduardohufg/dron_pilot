@@ -110,3 +110,8 @@ despues modifica el archivo llamado default.sdf añadiendo la siguientes lineas 
   <pose>12 5.5 5 0 -1.5708 0</pose>
 </include>
 ```
+
+como se nota en la siguiente imagen:
+
+![Lineas Modificadas](assets/s1.png)
+
