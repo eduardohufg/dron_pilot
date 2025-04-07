@@ -20,3 +20,15 @@ para correr este proyecto es necesario tener instalado ROS2 Humble, git, python 
 
 4. *Ros Humble*: Debes tener dispositivo con ubuntu 22.04 o alguna distribucion de linux que soporte ROS
     [Descargar ROS2 Humble](https://docs.ros.org/en/humble/Installation.html)
+
+### Instalacion y setup de la simulacion:
+
+Abre una terminal y corre los siguientes comandos:
+
+    ```bash
+    git git clone https://github.com/PX4/PX4-Autopilot.git --recursive
+    git bash ./PX4-Autopilot/Tools/setup/ubuntu.sh
+    git cd PX4-Autopilot/
+    git make px4_sitl
+    
+    ```
