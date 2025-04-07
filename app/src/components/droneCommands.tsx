@@ -25,14 +25,12 @@ type DroneControlState = {
   export default function DroneCommands() {
     const [connected, setConnected] = useState(false);
   
-    // Estado local para almacenar los 9 campos (X±, Y±, Z±, Yaw± y init)
     const [controlState, setControlState] = useState<DroneControlState>({
       position: { x_pos: 0, x_neg: 0, y_pos: 0, y_neg: 0, z_pos: 0, z_neg: 0 },
       orientation: { yaw_pos: 0, yaw_neg: 0 },
       command: { init: 0 },
     });
   
-    // Referencia al WebSocket y al estado
     const wsRef = useRef<WebSocket | null>(null);
     const controlStateRef = useRef(controlState);
   
@@ -40,7 +38,6 @@ type DroneControlState = {
       controlStateRef.current = controlState;
     }, [controlState]);
   
-    // Conexión al WS al montar el componente
     useEffect(() => {
       const ws = connectToMoveStream({
         onOpen: () => setConnected(true),
@@ -92,7 +89,7 @@ type DroneControlState = {
     };
   
     const btnClass =
-      "bg-blue-600 text-white font-bold py-2 px-4 rounded " +
+      "bg-blue-400 text-white font-bold py-2 px-4 rounded " +
       "hover:bg-blue-700 transition-colors focus:outline-none " +
       "focus:ring-2 focus:ring-blue-500";
   
@@ -102,12 +99,9 @@ type DroneControlState = {
           {connected ? "Ready to send comamnds" : "Conecting..."}
         </h2>
   
-        {/* Sección principal con la cruz X/Y y el stack Z al costado */}
         <div className="flex flex-col sm:flex-row items-center justify-center space-x-0 sm:space-x-8 space-y-4 sm:space-y-0">
           
-          {/* Cruzeta X/Y */}
           <div className="grid grid-rows-3 grid-cols-3 gap-2">
-            {/* Fila 1: espacio vacío - Y+ - espacio vacío */}
             <div></div>
             <button
               className={btnClass}
@@ -118,8 +112,6 @@ type DroneControlState = {
             </button>
             <div></div>
   
-            {/* Fila 2: X- - espacio vacío - X+ */}
-
             <button
               className={btnClass}
               onMouseDown={() => handleMouseDown("position", "y_neg")}
@@ -137,9 +129,7 @@ type DroneControlState = {
               Y+
             </button>
         
-  
-            {/* Fila 3: espacio vacío - Y- - espacio vacío */}
-            <div></div>
+              <div></div>
 
             <button
               className={btnClass}
@@ -152,7 +142,6 @@ type DroneControlState = {
             <div></div>
           </div>
   
-          {/* Stack Z (vertical) */}
           <div className="flex flex-col items-center space-y-2">
             <button
               className={btnClass}
@@ -171,7 +160,6 @@ type DroneControlState = {
           </div>
         </div>
   
-        {/* Fila para Yaw */}
         <div className="flex flex-row items-center space-x-4">
           <button
             className={btnClass}
@@ -189,7 +177,6 @@ type DroneControlState = {
           </button>
         </div>
   
-        {/* Botón INIT abajo */}
         <button
           className={btnClass}
           onMouseDown={() => handleMouseDown("command", "init")}

@@ -51,7 +51,7 @@ export function connectToMoveStream({
     const ws = new WebSocket(WS_MOVE_URL);
   
     ws.onopen = () => {
-      console.log("✅ WebSocket conectado a", WS_MOVE_URL);
+      console.log("WebSocket conected");
       onOpen?.();
     };
   
@@ -60,12 +60,12 @@ export function connectToMoveStream({
     };
   
     ws.onerror = (e) => {
-      console.error("❌ WebSocket error", e);
+      console.error("WebSocket error", e);
       onError?.(e);
     };
   
     ws.onclose = () => {
-      console.warn("🔌 WebSocket cerrado", WS_MOVE_URL);
+      console.warn("WebSocket closed");
       onClose?.();
     };
   

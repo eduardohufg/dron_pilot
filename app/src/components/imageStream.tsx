@@ -1,10 +1,9 @@
-// components/ImageStream.tsx
 import React, { useEffect, useRef, useState } from "react";
 import { connectToImageStream } from "../services/api_credentials";
 
 interface ImageStreamProps {
-  widthRatio?: number;  // Valor entre 0 y 1, default 0.66
-  heightRatio?: number; // Valor entre 0 y 1, default 0.66
+  widthRatio?: number;  
+  heightRatio?: number; 
 }
 
 const ImageStream: React.FC<ImageStreamProps> = ({
