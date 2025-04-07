@@ -45,6 +45,22 @@ sudo make install
 sudo ldconfig /usr/local/lib/
 ```
 
+## Nota
+
+Si cuando corres el comando "make" ves un error asi: 
+
+```bash
+CMake Error at /home/eduardo/Micro-XRCE-DDS-Agent/build/fastdds/tmp/fastdds-gitclone.cmake:40 (message): Failed to checkout tag: '2.12.x'
+```
+
+Para solucionar el error ve a la carpeta de "~/Micro-XRCE-DDS-Agent" y modifica la linea 99 del CMakeLists.txt a:
+
+```bash
+set(_fastdds_tag 2.12.1)
+```
+
+Guardalo y vuelve a intentarlo
+
 En otra terminal corre los siguinetes comandos para configurar el QGroundControl necesario para la simualcion
 
 ```bash
