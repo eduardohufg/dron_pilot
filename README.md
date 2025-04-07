@@ -1,5 +1,10 @@
 # Dron_pilot - Prueba tecnica
 
+### VIdeo Explicativo
+
+*Video Explicativo* en el siguiente enlace
+[video explicativo](https://youtu.be/Dny4c_E0j18)
+
 ### Descripción:
 
 Se necesita que un dron regrese de manera autonoma a un punto determinado para cargarse cuando tiene bateria baja, esto se puede hacer referenciando al dorn a un punto y orientarlo, esto se logra mediante la deteccion, aproximacion y centrado a un Aruco. Este trabajo muestra un algoritmo para lograr el objetivo con ayuda de la simualcion de PX4, ROS2 y la implementacion de una interfaz grafica
