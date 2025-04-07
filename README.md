@@ -26,9 +26,8 @@ para correr este proyecto es necesario tener instalado ROS2 Humble, git, python 
 Abre una terminal y corre los siguientes comandos:
 
     ```bash
-    git git clone https://github.com/PX4/PX4-Autopilot.git --recursive
-    git bash ./PX4-Autopilot/Tools/setup/ubuntu.sh
-    git cd PX4-Autopilot/
-    git make px4_sitl
-    
+    git clone https://github.com/PX4/PX4-Autopilot.git --recursive
+    bash ./PX4-Autopilot/Tools/setup/ubuntu.sh
+    cd PX4-Autopilot/
+    make px4_sitl
     ```
