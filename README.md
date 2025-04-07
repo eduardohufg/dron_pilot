@@ -82,3 +82,31 @@ Probablemente se descargo en la carpeta Downloads, por lo que dirijete a esa car
 cd ./Downloads
 chmod +x ./QGroundControl.AppImage
 ```
+
+Instala el bridge de gazebo con ROS y otras dependencias
+
+```bash
+pip install mavsdk
+pip install aioconsole
+pip install pygame
+sudo apt install ros-humble-ros-gzgarden
+pip install numpy
+pip install opencv-python
+```
+
+### Modificacion de mundo Gazebo
+
+dirigete a la carpeta de tu simulacion donde estan guardados los mundos, en la siguiente ruta: 
+
+```bash
+cd ~/PX4-Autopilot/Tools/simulation/gz/worlds
+```
+
+despues modifica el archivo llamado default.sdf añadiendo la siguientes lineas antes de cerrar la etiqueta </world>
+
+```bash
+<include>
+  <uri>model://arucotag</uri>
+  <pose>12 5.5 5 0 -1.5708 0</pose>
+</include>
+```
