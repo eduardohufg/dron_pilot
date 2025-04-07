@@ -45,7 +45,7 @@ sudo make install
 sudo ldconfig /usr/local/lib/
 ```
 
-## Nota
+### Nota
 
 Si cuando corres el comando "make" ves un error asi: 
 
