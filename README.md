@@ -115,3 +115,31 @@ como se nota en la siguiente imagen:
 
 ![Lineas Modificadas](assets/s1.png)
 
+## Instalacion de paquete de ROS
+
+Ahora creamos un workspace para trabajar con ROS
+
+En una nueva terminal corre el siguiente comando para crear el Workspace:
+
+```bash
+mkdir -p ws_px4/src
+```
+
+una vez creada metete a la carpeta src:
+
+```bash
+cd ./ws_px4/src
+```
+
+dentro de la carpeta copia el repositorio del paquete:
+
+```bash
+git clone https://github.com/eduardohufg/dron_pilot
+```
+
+regresa a la carpeta raiz del workspace y compila
+
+```bash
+cd ..
+colcon build
+```
