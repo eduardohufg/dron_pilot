@@ -23,11 +23,24 @@ para correr este proyecto es necesario tener instalado ROS2 Humble, git, python 
 
 ### Instalacion y setup de la simulacion:
 
-Abre una terminal y corre los siguientes comandos:
+Abre una terminal y corre los siguientes comandos para instalar el simulador:
 
 ```bash
 git clone https://github.com/PX4/PX4-Autopilot.git --recursive
 bash ./PX4-Autopilot/Tools/setup/ubuntu.sh
 cd PX4-Autopilot/
 make px4_sitl
+```
+
+Abre otra terminal y corre los siguientes comandos para instalar el agente de comunicacion
+
+```bash
+git clone -b v2.4.2 https://github.com/eProsima/Micro-XRCE-DDS-Agent.git
+cd Micro-XRCE-DDS-Agent
+mkdir build
+cd build
+cmake ..
+make
+sudo make install
+sudo ldconfig /usr/local/lib/
 ```
